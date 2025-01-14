@@ -5,7 +5,9 @@ on: [push, workflow_dispatch]
 jobs:
   build:
 
-    runs-on: windows-2022-32core
+    runs-on:
+      group: GPU
+      labels: rdp
     timeout-minutes: 9999
 
 
