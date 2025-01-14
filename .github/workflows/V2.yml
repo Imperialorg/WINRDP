@@ -5,9 +5,7 @@ on: [push, workflow_dispatch]
 jobs:
   build:
 
-    runs-on:
-      group: GPU
-      labels: rdp
+    runs-on: windows-latest
     timeout-minutes: 9999
 
 
