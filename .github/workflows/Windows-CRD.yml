@@ -12,7 +12,7 @@ on:
   
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: rdp
 
     steps:
     - uses: actions/checkout@v2
