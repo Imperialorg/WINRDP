@@ -53,4 +53,4 @@ jobs:
         echo "::set-output name=ngrok_url::$NGROK_URL"
 
     - name: Set ngrok RDP URL as output
-      run: echo "ngrok RDP URL: ${{ steps.ngrok-url.outputs.ngrok_url }}"
+      run: echo "ngrok RDP URL:${{ steps.display-ngrok-url.outputs.ngrok_url }}"
