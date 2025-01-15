@@ -1,0 +1,56 @@
+name: Setup RDP on GitHub-hosted Large Runner
+
+on: 
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  setup-rdp:
+    runs-on: [ubuntuimperial, GPU]
+
+    env:
+      NGROK_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
+      RDP_USERNAME: ${{ secrets.RDP_USERNAME }}
+      RDP_PASSWORD: ${{ secrets.RDP_PASSWORD }}
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up and start RDP
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y xrdp xfce4
+        sudo adduser ${{ secrets.RDP_USERNAME }} --gecos "" --disabled-password
+        echo "${{ secrets.RDP_USERNAME }}:${{ secrets.RDP_PASSWORD }}" | sudo chpasswd
+        sudo adduser ${{ secrets.RDP_USERNAME }} sudo
+        sudo systemctl enable xrdp
+        sudo systemctl start xrdp
+
+    - name: Install ngrok
+      run: |
+        curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null
+        echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | sudo tee /etc/apt/sources.list.d/ngrok.list
+        sudo apt-get update
+        sudo apt-get install ngrok
+
+    - name: Start ngrok for RDP
+      run: |
+        ngrok authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
+        ngrok tcp 3389 --log=stdout > ngrok.log &
+        sleep 10
+        cat ngrok.log
+
+    - name: Display ngrok RDP URL
+      id: ngrok-url
+      run: |
+        NGROK_URL=$(curl --silent http://127.0.0.1:4040/api/tunnels | jq -r .tunnels[0].public_url)
+        echo "RDP URL: $NGROK_URL"
+        echo "::set-output name=ngrok_url::$NGROK_URL"
+
+    - name: Set ngrok RDP URL as output
+      run: echo "ngrok RDP URL: ${{ steps.ngrok-url.outputs.ngrok_url }}"
