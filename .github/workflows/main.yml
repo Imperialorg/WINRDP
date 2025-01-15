@@ -10,7 +10,7 @@ on:
 
 jobs:
   setup-rdp:
-    runs-on: [ubuntuimperial, GPU]
+    runs-on: ubuntu-latest
 
     env:
       NGROK_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
